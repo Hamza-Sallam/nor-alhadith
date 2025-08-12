@@ -152,7 +152,7 @@ export function ChatInterface() {
             className="text-white hover:bg-white/20 transition-all duration-300"
           >
             <Globe className="w-4 h-4 mr-2" />
-            {language === "ar" ? "EN" : "عربي"}
+            {language === "en" ? "english" : "عربي"}
           </Button>
         </div>
       </header>

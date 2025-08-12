@@ -20,7 +20,7 @@ export default function Home() {
                   <img
                     src="/images/character.png"
                     alt="نور الحديث Assistant"
-                    className="w-full h-full object-contain animate-float"
+                    className="w-full h-full rounded-full object-contain animate-float"
                   />
                 </div>
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-md border-2 border-green-200">

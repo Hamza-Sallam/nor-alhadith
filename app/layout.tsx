@@ -24,7 +24,6 @@ const notoNaskhArabic = Noto_Naskh_Arabic({
 export const metadata: Metadata = {
   title: "نور الحديث - Hadith AI Assistant",
   description: "Islamic AI assistant for authentic Hadith knowledge",
-  generator: "v0.app",
 }
 
 export default function RootLayout({
