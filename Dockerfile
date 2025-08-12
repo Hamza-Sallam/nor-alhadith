@@ -1,20 +1,56 @@
-FROM node:22-alpine AS builder
+# Use Node.js 18 Alpine for better compatibility
+FROM node:18-alpine AS base
 
-ENV NODE_ENV=production
-RUN corepack enable && corepack prepare pnpm@latest --activate
-WORKDIR /usr/src/app
-COPY --chown=node:node package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-COPY --chown=node:node . .
-RUN pnpm build
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
 
-FROM node:22-alpine AS runner
-RUN corepack enable && corepack prepare pnpm@latest --activate
-WORKDIR /usr/src/app
-COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=builder /usr/src/app/.next ./.next
-COPY --chown=node:node --from=builder /usr/src/app/public ./public
-COPY --chown=node:node --from=builder /usr/src/app/package.json ./package.json
+# Install dependencies based on the preferred package manager
+COPY package.json pnpm-lock.yaml* ./
+RUN npm install -g pnpm && pnpm install --frozen-lockfile
+
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# Uncomment the following line in case you want to disable telemetry during the build.
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN npm install -g pnpm && pnpm build
+
+# Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+# Uncomment the following line in case you want to disable telemetry during runtime.
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Copy the built application
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+
+USER nextjs
+
 EXPOSE 3000
-ENV NODE_ENV=production
+
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
+
+# Use pnpm start for production
 CMD ["pnpm", "start"]
