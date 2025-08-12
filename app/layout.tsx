@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Space_Grotesk, DM_Sans, Noto_Naskh_Arabic } from "next/font/google"
+import "../lib/crypto-polyfill"
 import "./globals.css"
 
 const spaceGrotesk = Space_Grotesk({
