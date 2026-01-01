@@ -49,7 +49,7 @@ export function ChatInterface() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("https://n8n.180d.tr/webhook/rag-hadith", {
+      const response = await fetch("https://n8n.servers.tr/webhook/rag-hadith", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
